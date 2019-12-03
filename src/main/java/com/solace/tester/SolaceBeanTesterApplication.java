@@ -29,13 +29,9 @@ public class SolaceBeanTesterApplication implements CommandLineRunner  {
 	@Override
 	public void run(String... args) throws Exception {
 		Runtime.getRuntime().addShutdownHook(new ShutdownHook(orderChannel));
-		System.out.println("running testSubscribe");
 		testSubscribe();
-		System.out.println("running testPublish");
 		testPublish();
-		System.out.println("running sleep");
 		Thread.sleep(5000);
-		System.out.println("running end");
 	}
 	
 	public void testSubscribe() throws Exception {
