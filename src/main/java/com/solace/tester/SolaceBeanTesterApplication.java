@@ -35,11 +35,11 @@ public class SolaceBeanTesterApplication implements CommandLineRunner  {
 	}
 	
 	public void testSubscribe() throws Exception {
-		orderChannel.subscribe(new SubscribeListener());
+		orderChannel.subscribe(new OrderSubscribeListener());
 	}
 	
 	public void testPublish() throws Exception {
-		orderChannel.initPublisher(new PublishListener());
+		orderChannel.initPublisher(new OrderPublishListener());
 		Order order = new Order();
 		OrderMessage orderMessage = new OrderMessage();
 		orderMessage.setPayload(order);

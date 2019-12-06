@@ -1,6 +1,8 @@
 package com.solace.tester;
 
-public class PublishListener implements com.solace.asyncapi.OrderChannel.PublishListener {
+import com.solace.asyncapi.OrderChannel;
+
+public class OrderPublishListener implements OrderChannel.PublishListener {
 
 	@Override
 	public void onResponse(String messageId) {
