@@ -37,11 +37,11 @@
 			</exclusions>
 		</dependency>
 
-	<dependency>
-		<groupId>com.solace</groupId>
-		<artifactId>asyncapi-gen</artifactId>
-		<version>1.0.0</version>
-	</dependency>
+<!-- 	<dependency> -->
+<!-- 		<groupId>com.solace</groupId> -->
+<!-- 		<artifactId>asyncapi-gen</artifactId> -->
+<!-- 		<version>1.0.0</version> -->
+<!-- 	</dependency> -->
 	</dependencies>
 
 	<build>

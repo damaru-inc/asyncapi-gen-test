@@ -4,7 +4,7 @@ public class PublishListener implements com.solace.asyncapi.OrderChannel.Publish
 
 	@Override
 	public void onResponse(String messageId) {
-		System.out.println("Received " + messageId);
+		System.out.println("Broker received " + messageId);
 
 	}
 

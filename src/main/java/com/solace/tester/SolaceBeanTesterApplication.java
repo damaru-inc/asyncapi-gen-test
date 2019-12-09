@@ -12,10 +12,11 @@ import org.springframework.context.annotation.ComponentScan;
 import com.solace.asyncapi.Order;
 import com.solace.asyncapi.OrderChannel;
 import com.solace.asyncapi.OrderMessage;
+import com.solace.asyncapi.OrderQueueChannel;
 
 @SpringBootApplication
 @ComponentScan("com.solace")
-public class SolaceBeanTesterApplication implements CommandLineRunner  {
+public class SolaceBeanTesterApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SolaceBeanTesterApplication.class, args);
@@ -23,9 +24,12 @@ public class SolaceBeanTesterApplication implements CommandLineRunner  {
 
 	@Autowired
 	ApplicationContext ctx;
-	
-	@Autowired OrderChannel orderChannel;
-	
+
+	@Autowired
+	OrderChannel orderChannel;
+	@Autowired
+	OrderQueueChannel orderQueueChannel;
+
 	@Override
 	public void run(String... args) throws Exception {
 		Runtime.getRuntime().addShutdownHook(new ShutdownHook(orderChannel));
@@ -33,22 +37,23 @@ public class SolaceBeanTesterApplication implements CommandLineRunner  {
 		testPublish();
 		Thread.sleep(5000);
 	}
-	
+
 	public void testSubscribe() throws Exception {
-		orderChannel.subscribe(new SubscribeListener());
+		orderQueueChannel.subscribe(new SubscribeListener());
 	}
-	
+
 	public void testPublish() throws Exception {
 		orderChannel.initPublisher(new PublishListener());
 		Order order = new Order();
 		OrderMessage orderMessage = new OrderMessage();
 		orderMessage.setPayload(order);
-		
-		for (int i = 0; i < 10; i++) {
+
+		for (int i = 0; i < 50; i++) {
 			order.setOrderId(i);
 			order.setOrderDescription("I'm order # " + i);
 			orderChannel.sendOrderMessage(orderMessage, OrderChannel.Action.buyItem, "trace", i);
 			orderChannel.sendOrder(order, OrderChannel.Action.buyItem, "trace", i);
+			Thread.sleep(500);
 		}
 	}
 
@@ -59,21 +64,21 @@ public class SolaceBeanTesterApplication implements CommandLineRunner  {
 		Arrays.sort(beanNames);
 		for (String beanName : beanNames) {
 			System.out.println(beanName);
-		}		
+		}
 	}
-	
+
 	static class ShutdownHook extends Thread {
-		
+
 		private OrderChannel orderChannel;
-		
+
 		public ShutdownHook(OrderChannel orderChannel) {
 			this.orderChannel = orderChannel;
 		}
-		
+
 		@Override
 		public void run() {
 			System.out.println("Shutdown hook called.");
-			orderChannel.close();			
+			orderChannel.close();
 		}
 	}
 
