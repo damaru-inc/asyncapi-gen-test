@@ -43,7 +43,7 @@ public class SolaceBeanTesterApplication implements CommandLineRunner {
 	}
 
 	public void testPublish() throws Exception {
-		orderChannel.initPublisher(new PublishListener());
+		orderChannel.initPublisher(new OrderPublishListener());
 		Order order = new Order();
 		OrderMessage orderMessage = new OrderMessage();
 		orderMessage.setPayload(order);
