@@ -39,7 +39,7 @@ public class SolaceBeanTesterApplication implements CommandLineRunner {
 	}
 
 	public void testSubscribe() throws Exception {
-		orderQueueChannel.subscribe(new SubscribeListener());
+		orderQueueChannel.subscribe(new OrderSubscribeListener());
 	}
 
 	public void testPublish() throws Exception {
