@@ -1,15 +1,15 @@
 package com.solace.tester;
 
+import com.solace.asyncapi.OrderChannel;
 import com.solace.asyncapi.OrderMessage;
-import com.solace.asyncapi.OrderQueueChannel;
 
-public class OrderSubscribeListener implements OrderQueueChannel.SubscribeListener {
+public class OrderSubscribeListener implements OrderChannel.SubscribeListener {
 
 	@Override
 	public void onReceive(OrderMessage orderMessage) {
-
-		System.out.println("Received: " + orderMessage.getTopic() + "\n" + orderMessage.getPayload());
-
+		System.out.println("Received from topic: " + orderMessage.getTopic() +
+				" order id: " + orderMessage.getPayload().getOrderId() +
+				" message id: " + orderMessage.getMessageId());
 	}
 
 	@Override

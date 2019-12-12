@@ -1,5 +1,7 @@
 package com.solace.tester;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.solace.asyncapi.Account;
+import com.solace.asyncapi.Address;
 import com.solace.asyncapi.Order;
+import com.solace.asyncapi.Order.Shipping;
 import com.solace.asyncapi.OrderChannel;
 import com.solace.asyncapi.OrderMessage;
 import com.solace.asyncapi.OrderQueueChannel;
@@ -32,28 +37,53 @@ public class SolaceBeanTesterApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		Runtime.getRuntime().addShutdownHook(new ShutdownHook(orderChannel));
+		Runtime.getRuntime().addShutdownHook(new ShutdownHook(orderChannel, orderQueueChannel));
 		testSubscribe();
 		testPublish();
 		Thread.sleep(5000);
 	}
 
 	public void testSubscribe() throws Exception {
-		orderQueueChannel.subscribe(new OrderSubscribeListener());
+		orderChannel.subscribe(new OrderSubscribeListener());
+		//orderQueueChannel.subscribe(new OrderQueueSubscribeListener());
 	}
 
 	public void testPublish() throws Exception {
 		orderChannel.initPublisher(new OrderPublishListener());
+		
+		Address address = new Address();
+		address.setStreetAddress("123 Fake St");
+		address.setCity("Carp");
+		address.setPostalCode("K0A 1L0");
+		address.setProvince("ONT");
+		
+		Account account = new Account();
+		account.setAccountId(12345);
+		account.setFirstName("Angela");
+		account.setLastName("Aarons");
+		
+		Shipping shipping = new Shipping();
+		shipping.setCost(22.50);
+		shipping.setMethod(Shipping.Method.courier);
+		shipping.setShipTo(address);
+		
 		Order order = new Order();
+		order.setCustomer(account);
+		order.setShipping(shipping);
+		
 		OrderMessage orderMessage = new OrderMessage();
 		orderMessage.setPayload(order);
 
-		for (int i = 0; i < 50; i++) {
+		int span = 1;
+		for (int i = 0; i < 10; i++) {
 			order.setOrderId(i);
+			int price = 200 + i * 320;
 			order.setOrderDescription("I'm order # " + i);
-			orderChannel.sendOrderMessage(orderMessage, OrderChannel.Action.buyItem, "trace", i);
-			orderChannel.sendOrder(order, OrderChannel.Action.buyItem, "trace", i);
-			Thread.sleep(500);
+			BigDecimal bd = new BigDecimal(2 + i * 3.2);
+			bd.setScale(2, RoundingMode.FLOOR);
+			order.setPrice(price / 100.0);
+			orderChannel.sendOrderMessage(orderMessage, OrderChannel.Action.buyItem, "trace", span++);
+			orderChannel.sendOrderMessage(orderMessage, OrderChannel.Action.returnItem, "trace", span++);
 		}
 	}
 
@@ -70,15 +100,18 @@ public class SolaceBeanTesterApplication implements CommandLineRunner {
 	static class ShutdownHook extends Thread {
 
 		private OrderChannel orderChannel;
+		private OrderQueueChannel orderQueueChannel;
 
-		public ShutdownHook(OrderChannel orderChannel) {
+		public ShutdownHook(OrderChannel orderChannel, OrderQueueChannel orderQueueChannel) {
 			this.orderChannel = orderChannel;
+			this.orderQueueChannel = orderQueueChannel;
 		}
 
 		@Override
 		public void run() {
 			System.out.println("Shutdown hook called.");
 			orderChannel.close();
+			orderQueueChannel.close();
 		}
 	}
 
